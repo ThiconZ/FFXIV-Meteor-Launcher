@@ -295,7 +295,7 @@ namespace FFXIV_Meteor_Launcher
                 if (ServerThemeJson == "")
                 {
                     RestoreServerThemeDefault();
-                    BackgroundImage.Source = new BitmapImage(new Uri(System.IO.Directory.GetCurrentDirectory() + "\\FFXIV_1.0_Logo.png"));
+                    BackgroundImage.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/FFXIV_1.0_Logo.png"));
                     return;
                 }
 
@@ -376,7 +376,7 @@ namespace FFXIV_Meteor_Launcher
             {
                 // Reset theme to default settings
                 RestoreServerThemeDefault();
-                BackgroundImage.Source = new BitmapImage(new Uri(System.IO.Directory.GetCurrentDirectory() + "\\FFXIV_1.0_Logo.png"));
+                BackgroundImage.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/FFXIV_1.0_Logo.png"));
             }
         }
 

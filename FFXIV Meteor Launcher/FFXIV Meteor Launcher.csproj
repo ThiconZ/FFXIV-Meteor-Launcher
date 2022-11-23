@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\FFXIV_1.0_Logo.png" />
     <None Remove="Resources\Icon.png" />
   </ItemGroup>
 
@@ -20,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\FFXIV_1.0_Logo.png" />
     <Resource Include="Resources\Icon.ico" />
   </ItemGroup>
 
