@@ -188,7 +188,7 @@ namespace FFXIV_Meteor_Launcher
 
             if (HasDuplicateEntries)
             {
-                MessageBox.Show("Duplicate server entries were found in Server.xml. Only the first occurrence has been added to the server list.\n\nIt is strongly recommended that you remove duplicates from this file as soon as possible.", this.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Duplicate server entries were found in Servers.xml. Only the first occurrence has been added to the server list.\n\nIt is strongly recommended that you remove duplicates from this file as soon as possible.", this.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             return true;
