@@ -53,6 +53,7 @@ namespace FFXIV_Meteor_Launcher
         public enum LauncherStates
         {
             Idle,
+            LoadingLauncherSettings,
             DetectingInstallation,
             LoadingServerList,
             LoadingServerTheme,
@@ -87,9 +88,25 @@ namespace FFXIV_Meteor_Launcher
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            SetLauncherState(LauncherStates.DetectingInstallation);
-            // Verify a game installation path is set, if none is given, exit application
-            GetInstallLocation();
+            SetLauncherState(LauncherStates.LoadingLauncherSettings);
+            LoadLauncherSettings();
+
+            if (InstallPath == "")
+            {
+                SetLauncherState(LauncherStates.DetectingInstallation);
+                // Verify a game installation path is set, if none is given, exit application
+                GetInstallLocation();
+
+                if (MessageBox.Show($"The FFXIV installation has been set to:\n[ {InstallPath} ]\n\nDo you want to keep this setting?\n\nNote: This can be changed in Settings.cfg after exiting the launcher.", this.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                {
+                    InstallPath = PromptInstallLocation();
+                    if (InstallPath == "")
+                    {
+                        MessageBox.Show("No installation location has been selected. The launcher will now terminate.", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        Application.Current.Shutdown();
+                    }
+                }
+            }
 
             // Check if ffxiv_patches directory is setup
             if (!System.IO.Directory.Exists(System.IO.Path.Combine(InstallPath, "ffxiv_patches")))
@@ -134,10 +151,17 @@ namespace FFXIV_Meteor_Launcher
             }
 
             // Select Default Server
-            // Use last selected server if exists in list and preferences
+            // Use the last selected server from user settings if it exists in the current ServerEntries list
             if (ServerEntries.Count > 0)
             {
-                CurrentServer = ServerEntries.FirstOrDefault();
+                if (CurrentServer.Name != "")
+                {
+                    CurrentServer = ServerEntries.FirstOrDefault(x => x.Name == CurrentServer.Name, ServerEntries.First());
+                }
+                else
+                {
+                    CurrentServer = ServerEntries.First();
+                }
 
                 ServerListComboBox.SelectedItem = CurrentServer.Name;
             }
@@ -147,6 +171,66 @@ namespace FFXIV_Meteor_Launcher
             LoadServerTheme();
 
             CheckGameVersionState();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveLauncherSettings();
+        }
+
+        private bool LoadLauncherSettings()
+        {
+            if (File.Exists("Settings.json"))
+            {
+                try
+                {
+                    var SettingsContent = System.Text.Json.JsonSerializer.Deserialize<LauncherSettingsLayout>(File.ReadAllText("Settings.json"));
+
+                    if (File.Exists(System.IO.Path.Combine(SettingsContent.InstallLocation, "FFXIVBoot.exe")))
+                    {
+                        InstallPath = SettingsContent.InstallLocation;
+                    }
+                    else
+                    {
+                        MessageBox.Show("The install location provided in Settings.json was not a valid FFXIV installation.\n\nThe launcher will now attempt to automatically detect your installation.", this.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    
+                    CurrentServer.Name = SettingsContent.DefaultServerName;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading user settings from Settings.json file.\n\n{ex.Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+            else
+            {
+                // User does not have any existing settings, a file will be created for them later
+                return true;
+            }
+
+            return true;
+        }
+
+        private bool SaveLauncherSettings()
+        {
+            LauncherSettingsLayout SettingsContent = new LauncherSettingsLayout()
+            {
+                InstallLocation = InstallPath,
+                DefaultServerName = CurrentServer.Name
+            };
+
+            try
+            {
+                File.WriteAllText("Settings.json", JsonSerializer.Serialize(SettingsContent, new JsonSerializerOptions() { WriteIndented = true }));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error writing user settings to Settings.json file.\n\n{ex.Message}", this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            return true;
         }
 
         private bool LoadServerList()
