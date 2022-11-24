@@ -86,20 +86,6 @@ namespace FFXIV_Meteor_Launcher
             // Patch the second version of CreateEffectThread's processor count condition
             result = ApplyPatch(hProcess, (IntPtr)(ImageBase + 0xBB95D3), new byte[] { 0xB5, 0x1 }, (uint)2);
 
-            /*
-            // Patch out Processor Affinity Mask
-            result = ApplyPatch(hProcess, (IntPtr)(ImageBase + 0x403698), new byte[] { 0x90, 0x90 }, (uint)2);
-
-            // Patch out SetProcessorAffinity call
-            result = ApplyPatch(hProcess, (IntPtr)(ImageBase + 0x4036A0), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, (uint)7);
-
-            // Patch out Thread Affinity Mask
-            result = ApplyPatch(hProcess, (IntPtr)(ImageBase + 0x4036A7), new byte[] { 0x90, 0x90 }, (uint)2);
-
-            // Patch out SetThreadAffinity call
-            result = ApplyPatch(hProcess, (IntPtr)(ImageBase + 0x4036AF), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, (uint)7);
-            */
-
             bool ForceFixedTickCountValue = false;
             if (ForceFixedTickCountValue)
             {
