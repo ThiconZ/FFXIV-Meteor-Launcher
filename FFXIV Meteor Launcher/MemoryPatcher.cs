@@ -64,8 +64,22 @@ namespace FFXIV_Meteor_Launcher
             result = ApplyPatch(hProcess, (IntPtr)(ImageBase + g_lobbyHostNameAddress), Encoding.ASCII.GetBytes(lobbyHostName), (uint)lobbyHostName.Length + 1);
 
             // Patch out the entire initialization step of GetCurrentProcess > SetProcessAffinityMask > GetCurrentThread > SetThreadAffinityMask
-            // This normally crashes on 16+ core processors due to improper hardcoded values
+            /* This normally crashes on 16+ core processors due to improper hardcoded values
+            //
+            // Patched original code:
+            // CurrentProcess = GetCurrentProcess();
+            // SetProcessAffinityMask(CurrentProcess, 0xFFFFFFFF);
+            // CurrentThread = GetCurrentThread();
+            // SetThreadAffinityMask(CurrentThread, 0xFFFFFFFF);
+            */
+
             result = ApplyPatch(hProcess, (IntPtr)(0x403698), Enumerable.Repeat<byte>(0x90, 30).ToArray(), (uint)30);
+
+
+            // VFX Effect Threads are normally limited to the number of cpu threads available, however it is hardcoded to a limit of 32 threads
+            // Hitting or exceeding this limit causes an exception and crashes the client.
+            // The following two patches remove this 32 thread limitation and allow the client to scale up to as many threads the host has available
+            // Patched function (0xBB9500) SQEX::CDev::Engine::Vfx::Qix::Thread::ThreadManager::CreateEffectThread
 
             // Patch the processor count condition in CreateEffectThread
             result = ApplyPatch(hProcess, (IntPtr)(ImageBase + 0xBB952B), new byte[] { 0xB5, 0x1 }, (uint)2);
