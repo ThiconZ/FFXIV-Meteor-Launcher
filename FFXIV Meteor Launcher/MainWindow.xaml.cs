@@ -979,17 +979,21 @@ namespace FFXIV_Meteor_Launcher
                         string LoginDataEscaped = Convert.ToBase64String(Encoding.UTF8.GetBytes(LoginDataString)).Replace("+", "-").Replace("/", "_");
                         var RequestString = $"{{\"authentication\": \"{LoginDataEscaped}\"}}";
 
-                        var RequestUri = new UriBuilder(CurrentServer.LoginUrl);
-                        client.BaseAddress = new Uri(RequestUri.Scheme + "://" + RequestUri.Host);
-
-                        var Request = new HttpRequestMessage(HttpMethod.Post, RequestUri.Path);
+                        var Request = new HttpRequestMessage(HttpMethod.Post, CurrentServer.LoginUrl);
                         Request.Content = new StringContent(RequestString, System.Text.Encoding.UTF8, "application/json");
 
-                        var Response = await client.SendAsync(Request);
+                        try
                         {
-                            Debug.WriteLine(Response);
-                            ResponseString = await Response.Content.ReadAsStringAsync();
-                            Debug.WriteLine(ResponseString);
+                            var Response = await client.SendAsync(Request);
+                            {
+                                Debug.WriteLine(Response);
+                                ResponseString = await Response.Content.ReadAsStringAsync();
+                                Debug.WriteLine(ResponseString);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ResponseString = $"Error: {ex.Message}";
                         }
                     }
                 }
