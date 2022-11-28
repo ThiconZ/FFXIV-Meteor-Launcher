@@ -123,9 +123,7 @@ namespace FFXIV_Meteor_Launcher
             }
 
             // Update Version labels with launcher and client versions
-            VersionLabel.Content = $"MLVersion: {Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
-            BootVersionLabel.Content = $"Boot: {GetClientVersion("boot")}";
-            GameVersionLabel.Content = $"Game: {GetClientVersion("game")}";
+            UpdateVersionLabels();
 
             BackupServerThemeDefault();
 
@@ -278,6 +276,13 @@ namespace FFXIV_Meteor_Launcher
             return true;
         }
         
+        private void UpdateVersionLabels()
+        {
+            VersionLabel.Content = $"MLVersion: {Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
+            BootVersionLabel.Content = $"Boot: {GetClientVersion("boot")}";
+            GameVersionLabel.Content = $"Game: {GetClientVersion("game")}";
+        }
+
         private void CheckGameVersionState()
         {
             if (!IsGameUpToDate())
@@ -662,35 +667,27 @@ namespace FFXIV_Meteor_Launcher
                 {
                     VerifyPatchFiles();
 
-                    InvokeControl(() =>
+                    // Downlaod any missing patch files before going through the install process if needed
+                    if (PatchFilesNeeded.Count > 0)
                     {
-                        if (PatchFilesNeeded.Count > 0)
+                        InvokeControl(() =>
                         {
                             long TotalDownloadSize = PatchFilesNeeded.Sum(x => x.Size);
                             TotalPatchDownloadSize = TotalDownloadSize;
                             MessageBox.Show($"The launcher will now download {BytesToString(TotalDownloadSize)} of patch data.", this.Title, MessageBoxButton.OK, MessageBoxImage.Information);
 
+                            SetLauncherState(LauncherStates.UpdateInProgress);
                             ProgressChanged += OnDownloadProgressChanged;
                             UpdateCancellationTokenSource = new CancellationTokenSource();
                             CancellationToken UpdateCancellationToken = UpdateCancellationTokenSource.Token;
                             DownloadPatchFiles(PatchFilesNeeded, UpdateCancellationToken);
-                            SetLauncherState(LauncherStates.UpdateInProgress);
-                        }
-                        LaunchBtn.IsEnabled = true;
-                    });
-
-                    UpdateCancellationTokenSource = new CancellationTokenSource();
-                    CancellationToken UpdateCancellationToken = UpdateCancellationTokenSource.Token;
-                    InstallPatchFiles(UpdateCancellationToken);
-
-                    WriteUpdatedVersionFiles();
-
-                    InvokeControl(() =>
+                            LaunchBtn.IsEnabled = true;
+                        });
+                    }
+                    else
                     {
-                        SetLauncherState(LauncherStates.Ready);
-                        SetStatus("Status: Ready!");
-                        StatusBar.Value = 0;
-                    });
+                        PerformPatchInstallProcess();
+                    }
                 });
             }
             else if (LauncherState == LauncherStates.PatchInstalling)
@@ -809,6 +806,8 @@ namespace FFXIV_Meteor_Launcher
                                 {
                                     if (cancellationToken.IsCancellationRequested)
                                     {
+                                        ProgressChanged -= OnDownloadProgressChanged;
+
                                         InvokeControl(() =>
                                         {
                                             SetLauncherState(LauncherStates.UpdateRequired);
@@ -830,6 +829,11 @@ namespace FFXIV_Meteor_Launcher
                     }
                 }
             }
+
+            if (TotalDownloadedPatchSize == TotalPatchDownloadSize)
+            {
+                PerformPatchInstallProcess();
+            }
         }
 
         private void OnPatchProgressChanged(string PatchFile, string EntryFile, long CurrentEntryFile, long TotalEntryFiles)
@@ -841,6 +845,34 @@ namespace FFXIV_Meteor_Launcher
                 SetStatus($"Installing {PatchName} Patch [{CurrentPatchInstalling}/{PatchData.PatchDataList.Count}]. Updating {UpdatedFile} {CurrentEntryFile} / {TotalEntryFiles}...");
                 double ProgressPercentage = Math.Round((double)CurrentPatchInstalling / PatchData.PatchDataList.Count * 100, 2);
                 StatusBar.Value = ProgressPercentage;
+            });
+        }
+
+        private void PerformPatchInstallProcess()
+        {
+            SetLauncherState(LauncherStates.PatchInstalling);
+            UpdateCancellationTokenSource = new CancellationTokenSource();
+            CancellationToken UpdateCancellationToken = UpdateCancellationTokenSource.Token;
+            
+            InvokeControl(() =>
+            {
+                LaunchBtn.IsEnabled = true;
+            });
+
+            InstallPatchFiles(UpdateCancellationToken);
+
+            if (UpdateCancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            WriteUpdatedVersionFiles();
+
+            InvokeControl(() =>
+            {
+                SetLauncherState(LauncherStates.Ready);
+                SetStatus("Status: Ready!");
+                StatusBar.Value = 0;
             });
         }
 
@@ -867,7 +899,7 @@ namespace FFXIV_Meteor_Launcher
                         StatusBar.Value = 0;
                     });
 
-                    return;
+                    break;
                 }
             }
             Patcher.PatchProgressChanged -= OnPatchProgressChanged;
@@ -877,6 +909,10 @@ namespace FFXIV_Meteor_Launcher
         {
             System.IO.File.WriteAllText(System.IO.Path.Combine(InstallPath, $"boot.ver"), FFXIV_BOOT_VERSION);
             System.IO.File.WriteAllText(System.IO.Path.Combine(InstallPath, $"game.ver"), FFXIV_GAME_VERSION);
+
+            UpdateVersionLabels();
+
+            CheckGameVersionState();
         }
 
         private async void LoginBtn_Click(object sender, RoutedEventArgs e)
