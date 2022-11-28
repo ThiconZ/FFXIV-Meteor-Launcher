@@ -16,9 +16,15 @@ This supports being used with the [Project Meteor Server](http://ffxivclassic.fr
 
 ## How To Use
 
-Once you start the launcher, you may be greeted with a dialog asking you to select your FFXIV 1.0 installation location. This occurs when the game is installed through abnormal means such as copying your installation to another directory instead of using the original game installer. Following the instructions for selecting your correct installation location to progress past this step. This is required and if you do not select a location the launcher will exit.
+Once you start the launcher, you may be greeted with a dialog asking you to select your FFXIV 1.0 installation location. This occurs when the game is installed through abnormal means such as copying your installation to another directory instead of using the original game installer. Following the instructions for selecting your correct installation location to progress past this step. This is required and if you do not select a location the launcher will exit. The location will be stored in [Settings.json](#settingsjson) if it needs to be modified later.
 
-For most launcher starts, you will be brought directly to the main interface. From here you can select what server you want to access, enter your login information, patch the game client if necessary, and most importantly, launch the game.
+For most launcher starts, you will be brought directly to the main interface. From here you can:
+- Select what server you want to access.
+- Enter your login information for the selected server.
+  - If a debug server does not need credentials it is possible to leave the fields blank.
+- Patch the game client if necessary.
+  - Patching is supported from 1.00 (fresh install from original retail disc iso) all the way up to 1.23b and any versions in between.
+- Launch the game.
 
 ![](https://github.com/ThiconZ/FFXIV-Meteor-Launcher/blob/master/Screenshots/MeteorLauncher_Screenshot.png)
 
@@ -78,9 +84,9 @@ Example of a completed `Servers.xml` file:
 
 ## Theme.json Format
 
-FFXIV Meteor Launcher supports changing the location and appearance of the interface to allow servers to have a more unique feel. These settings are controlled through a JSON file (referenced as Theme.json here but any name is valid).
+FFXIV Meteor Launcher supports changing the location and appearance of the interface to allow servers to have a more unique feel. These settings are controlled through a JSON file (referenced as `Theme.json` here but any name is valid).
 
-This file is specified in the Servers.xml on a per-server basis as noted in the prior [Servers.xml Format](#serversxml-format) section.
+This file is specified in the `Servers.xml` on a per-server basis as noted in the prior [Servers.xml Format](#serversxml-format) section.
 
 Table of UI elements able to be modified:
 
@@ -169,3 +175,21 @@ Example Theme.json file:
 }
 ```
 
+## Settings.json
+
+The launcher will save some user settings into a `Settings.json` file located alongside the launcher binary. Currently, this file is used to store:
+
+- The installation location
+- The last selected server
+
+If this file does not exist when the launcher is run, it will be created on exit with the current settings. Additionally, users may edit this file (while the launcher is not running) to change their values for the next run. This can be useful for changing the install path of the game client.
+
+Example Settings.json
+```json
+{
+  "InstallLocation": "H:\\FFXIV 1.0\\SquareEnix\\FINAL FANTASY XIV",
+  "DefaultServerName": "Default Server"
+}
+```
+
+This file is only for launcher settings. Game settings are still maintained through the `FFXIVConfig.exe` application in the game installation directory.
