@@ -830,7 +830,7 @@ namespace FFXIV_Meteor_Launcher
                 }
             }
 
-            if (TotalDownloadedPatchSize == TotalPatchDownloadSize)
+            if (TotalDownloadedPatchSize == TotalPatchDownloadSize && !cancellationToken.IsCancellationRequested)
             {
                 PerformPatchInstallProcess();
             }
