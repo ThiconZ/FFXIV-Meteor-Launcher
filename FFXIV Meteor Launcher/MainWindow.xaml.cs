@@ -866,10 +866,9 @@ namespace FFXIV_Meteor_Launcher
                 return;
             }
 
-            WriteUpdatedVersionFiles();
-
             InvokeControl(() =>
             {
+                WriteUpdatedVersionFiles();
                 SetLauncherState(LauncherStates.Ready);
                 SetStatus("Status: Ready!");
                 StatusBar.Value = 0;
