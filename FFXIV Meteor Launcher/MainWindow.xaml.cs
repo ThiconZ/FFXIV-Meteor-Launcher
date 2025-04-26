@@ -1064,6 +1064,7 @@ namespace FFXIV_Meteor_Launcher
             var EscapedBase64 = base64.Replace("+", "-").Replace("/", "_");
 
             Debug.WriteLine(EscapedBase64);
+            Debug.WriteLine(CurrentTickCount);
 
             return (LoginToken: EscapedBase64, TickCount: CurrentTickCount);
         }

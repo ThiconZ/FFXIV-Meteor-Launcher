@@ -281,6 +281,25 @@ namespace FFXIV_Meteor_Launcher
                         throw new Exception("Missing data for Entry file.");
                     }
                 }
+
+                // Operation Mode is Delete
+                // Read any remaining bytes of the entry and then attempt the file delete
+                if (OperationMode == 0x44)
+                {
+                    Reader.ReadBytes((int)EntryDataSize);
+
+                    if (System.IO.File.Exists(FullFilePath))
+                    {
+                        System.IO.File.Delete(FullFilePath);
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"Warning: File [{FullFilePath}] deletion requested but file does not exist.");
+                    }
+
+                    continue;
+                }
+
                 if (EntryDataSize == 0)
                 {
                     continue;
