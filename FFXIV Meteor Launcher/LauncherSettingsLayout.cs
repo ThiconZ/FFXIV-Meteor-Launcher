@@ -10,11 +10,13 @@ namespace FFXIV_Meteor_Launcher
     {
         public string InstallLocation { get; set; }
         public string DefaultServerName { get; set; }
+        public string BasePatchDownloadURL { get; set; }
 
         public LauncherSettingsLayout()
         {
             InstallLocation = "";
             DefaultServerName = "";
+            BasePatchDownloadURL = "";
         }
     }
 }

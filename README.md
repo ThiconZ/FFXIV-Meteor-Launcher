@@ -181,6 +181,7 @@ The launcher will save some user settings into a `Settings.json` file located al
 
 - The installation location
 - The last selected server
+- The web server to download base game patch data from (not server specific patches)
 
 If this file does not exist when the launcher is run, it will be created on exit with the current settings. Additionally, users may edit this file (while the launcher is not running) to change their values for the next run. This can be useful for changing the install path of the game client.
 
@@ -189,6 +190,7 @@ Example Settings.json
 {
   "InstallLocation": "H:\\FFXIV 1.0\\SquareEnix\\FINAL FANTASY XIV",
   "DefaultServerName": "Default Server"
+  "BasePatchDownloadURL": "http://ffxivpatches.s3.amazonaws.com/"
 }
 ```
 

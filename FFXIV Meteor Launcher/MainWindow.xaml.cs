@@ -194,6 +194,11 @@ namespace FFXIV_Meteor_Launcher
                     }
                     
                     CurrentServer.Name = SettingsContent.DefaultServerName;
+
+                    if (!string.IsNullOrEmpty(SettingsContent.BasePatchDownloadURL))
+                    {
+                        PatchData.PatchDownloadUrl = SettingsContent.BasePatchDownloadURL;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -215,7 +220,8 @@ namespace FFXIV_Meteor_Launcher
             LauncherSettingsLayout SettingsContent = new LauncherSettingsLayout()
             {
                 InstallLocation = InstallPath,
-                DefaultServerName = CurrentServer.Name
+                DefaultServerName = CurrentServer.Name,
+                BasePatchDownloadURL = PatchData.PatchDownloadUrl
             };
 
             try
